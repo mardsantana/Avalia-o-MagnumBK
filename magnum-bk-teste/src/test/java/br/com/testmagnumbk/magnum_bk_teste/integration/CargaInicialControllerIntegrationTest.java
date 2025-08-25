@@ -45,16 +45,12 @@ class CargaInicialControllerIntegrationTest {
     }
 
     private String obterTokenJwt() {
-        // Endereço do endpoint de login.
         String urlLogin = "http://localhost:" + port + "/v1/api/auth/login";
 
-        // Credenciais de login.
         Map<String, String> loginCredentials = Map.of("username", "Mardson Santana", "password", "12345678");
 
-        // Faz a requisição de login.
         ResponseEntity<Map> response = restTemplate.postForEntity(urlLogin, loginCredentials, Map.class);
 
-        // Verifica se o login foi bem-sucedido e extrai o token.
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             return (String) response.getBody().get("token");
         }
@@ -63,32 +59,29 @@ class CargaInicialControllerIntegrationTest {
 
     @Test
     void cargaInicial_deveChamarFipeClientEEnviarParaKafka() {
-        // Obter o token JWT antes de fazer a requisição do teste.
         String jwtToken = obterTokenJwt();
         headers.setBearerAuth(jwtToken);
 
 
-        // Arrange: mock das marcas
+        // Arrange
         Map<String, Object> marca1 = Map.of("nome", "FIAT");
         Map<String, Object> marca2 = Map.of("nome", "FORD");
         List<Map<String, Object>> marcasMock = List.of(marca1, marca2);
 
         when(fipeClient.buscarMarcas()).thenReturn(marcasMock);
 
-        // Act: chama o endpoint com autenticação
+        // Act
         String url = "http://localhost:" + port + "/v1/api/veiculos/carga-inicial";
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-        // Assert: status 200 e corpo correto
+        // Assert
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertThat(response.getBody()).isEqualTo("Carga inicial enviada para processamento.");
 
-        // Verifica se cada marca foi enviada para Kafka
         verify(kafkaMarcaProducer, times(1)).enviarProdutoParaFila(argThat(m -> "FIAT".equals(m.get("nome"))));
         verify(kafkaMarcaProducer, times(1)).enviarProdutoParaFila(argThat(m -> "FORD".equals(m.get("nome"))));
 
-        // Verifica que o FipeClient foi chamado
         verify(fipeClient, times(1)).buscarMarcas();
     }
 }
