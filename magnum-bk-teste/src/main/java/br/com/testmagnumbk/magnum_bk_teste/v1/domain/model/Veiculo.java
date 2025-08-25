@@ -27,7 +27,6 @@ public class Veiculo {
     @JoinColumn(name = "marca_id")
     private Marca marca;
 
-//     regra de negócio para atualizar
     public void atualizar(AtualizaVeiculoRequest request) {
         this.modelo = request.modelo();
         this.observacoes = request.observacoes();

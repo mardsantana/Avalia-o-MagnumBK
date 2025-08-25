@@ -15,7 +15,7 @@ public class KafkaMarcaProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private static final String TOPIC = "marcas-topic";
 
-    public void enviarMarca(Map<String, Object> marca) {
+    public void enviarProdutoParaFila(Map<String, Object> marca) {
         log.debug("Publicando no tópico [{}]: {}", TOPIC, marca);
         kafkaTemplate.send(TOPIC, marca);
     }

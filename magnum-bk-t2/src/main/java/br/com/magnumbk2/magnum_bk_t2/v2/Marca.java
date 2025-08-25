@@ -25,9 +25,4 @@ public class Marca {
 
     @OneToMany(mappedBy = "marca", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Veiculo> veiculos = new ArrayList<>();
-
-    public void adicionarVeiculo(Veiculo veiculo) {
-        veiculos.add(veiculo);
-        veiculo.setMarca(this);
-    }
 }

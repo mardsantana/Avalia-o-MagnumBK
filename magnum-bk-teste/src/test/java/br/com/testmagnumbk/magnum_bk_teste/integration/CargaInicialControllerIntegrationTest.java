@@ -85,8 +85,8 @@ class CargaInicialControllerIntegrationTest {
         assertThat(response.getBody()).isEqualTo("Carga inicial enviada para processamento.");
 
         // Verifica se cada marca foi enviada para Kafka
-        verify(kafkaMarcaProducer, times(1)).enviarMarca(argThat(m -> "FIAT".equals(m.get("nome"))));
-        verify(kafkaMarcaProducer, times(1)).enviarMarca(argThat(m -> "FORD".equals(m.get("nome"))));
+        verify(kafkaMarcaProducer, times(1)).enviarProdutoParaFila(argThat(m -> "FIAT".equals(m.get("nome"))));
+        verify(kafkaMarcaProducer, times(1)).enviarProdutoParaFila(argThat(m -> "FORD".equals(m.get("nome"))));
 
         // Verifica que o FipeClient foi chamado
         verify(fipeClient, times(1)).buscarMarcas();

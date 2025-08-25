@@ -42,8 +42,8 @@ class CargaInicialApplicationServiceTest {
         cargaInicialApplicationService.executarCargaInicial();
         // Assert
         verify(fipeClient, times(1)).buscarMarcas();
-        verify(kafkaMarcaProducer, times(1)).enviarMarca(marcas.get(0));
-        verify(kafkaMarcaProducer, times(1)).enviarMarca(marcas.get(1));
+        verify(kafkaMarcaProducer, times(1)).enviarProdutoParaFila(marcas.get(0));
+        verify(kafkaMarcaProducer, times(1)).enviarProdutoParaFila(marcas.get(1));
     }
 
     @Test

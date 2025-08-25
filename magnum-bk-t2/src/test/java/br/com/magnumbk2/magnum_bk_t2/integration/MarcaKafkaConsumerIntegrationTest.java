@@ -62,7 +62,7 @@ class MarcaKafkaConsumerIntegrationTest {
 
     @Test
     void consumerDeveProcessarMensagemEsalvarDadosNoBanco() {
-        // Arrange: Simular a resposta da API da Fipe
+        // Arrange
         Integer codigoMarcaFiat = 21;
         String nomeMarcaFiat = "Fiat";
         List<VeiculoDTO> veiculosMock = List.of(
@@ -71,21 +71,19 @@ class MarcaKafkaConsumerIntegrationTest {
         );
         when(fipeClient.buscarVeiculosPorMarca(eq(codigoMarcaFiat))).thenReturn(veiculosMock);
 
-        // Arrange: Criar a mensagem que será enviada para o Kafka
+        // Arrange
         Map<String, Object> payload = Map.of(
                 "codigo", codigoMarcaFiat,
                 "nome", nomeMarcaFiat
         );
 
-        // Act: Enviar a mensagem para o tópico do Kafka.
+        // Act
         kafkaTemplate.send("marcas-topic", payload);
 
-        // Aguardar o consumidor processar a mensagem.
-        // Espera de forma inteligente até que o número de veículos seja 2
         await().atMost(10, TimeUnit.SECONDS)
                 .until(() -> veiculoRepository.count() == 2);
 
-        // Assert: Verificar se a marca e os veículos foram salvos no banco de dados.
+        // Assert
         var marcaSalva = marcaRepository.findByCodigoFipe(codigoMarcaFiat);
         assertThat(marcaSalva).isPresent();
         assertThat(marcaSalva.get().getNome()).isEqualTo(nomeMarcaFiat);

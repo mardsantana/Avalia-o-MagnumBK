@@ -23,7 +23,7 @@ public class CargaInicialApplicationService implements CargaInicialService{
         log.info("Total de {} marcas encontradas na FIPE", marcas.size());
         marcas.forEach(marca -> {
             log.info("Enviando marca para Kafka -> {}", marca);
-            kafkaMarcaProducer.enviarMarca(marca);
+            kafkaMarcaProducer.enviarProdutoParaFila(marca);
         });
         log.info("Carga inicial finalizada com sucesso.");
     }

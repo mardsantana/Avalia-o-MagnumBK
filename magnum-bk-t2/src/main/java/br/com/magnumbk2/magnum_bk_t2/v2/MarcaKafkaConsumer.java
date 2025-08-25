@@ -15,7 +15,7 @@ public class MarcaKafkaConsumer {
     private final MarcaService marcaService;
 
     @KafkaListener(topics = "marcas-topic", groupId = "api2-consumer-group")
-    public void consumirMarca(Map<String, Object> payload) {
+    public void processarMensagemRecebida(Map<String, Object> payload) {
         try {
             log.info("Mensagem recebida do Kafka: {}", payload);
 
