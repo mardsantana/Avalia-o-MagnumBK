@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: magnum-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1998
+      POSTGRES_DB: magnumbk
+    ports:
+      - "5433:5432"           # Porta externa 5433, interna 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - magnum-network
+
+  # Redis para cache
+  redis:
+    image: redis:7
+    container_name: magnum-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - magnum-network
+
+  # Zookeeper (necessário para Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: magnum-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - magnum-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: magnum-kafka
+    ports:
+      - "9092:9092"          # comunicação interna Docker
+      - "29092:29092"        # comunicação host -> Kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://magnum-kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+    depends_on:
+      - zookeeper
+    networks:
+      - magnum-network
+
+  # Adminer (opcional, client web para Postgres)
+  adminer:
+    image: adminer:4
+    container_name: magnum-adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - magnum-network
+
+volumes:
+  postgres_data:
+
+networks:
+  magnum-network:
+    driver: bridge
